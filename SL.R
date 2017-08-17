@@ -1,6 +1,5 @@
 # ------------------------ #
 # sandlance data
-# see https://docs.google.com/document/d/1ir0RTK1e77-6_UG_DJjd5XQWPmO4kw6d_4WDOyQjqwE/edit
 # ------------------------ #
 
 
