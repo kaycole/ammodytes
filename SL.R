@@ -17,7 +17,9 @@ require(ggrepel)
 # ------------------------ #
 # set paths
 # ------------------------ #
-dir = "//ifw-hqfs1/MB SeaDuck/seabird_database/Kaycee_Working_Folder/sandlance/BrianSmith_data/"
+#dir = "//ifw-hqfs1/MB SeaDuck/seabird_database/Kaycee_Working_Folder/sandlance/BrianSmith_data/"
+dir = "C:/Users/kecoleman/Downloads"
+dir.out = "~/SL/"
 setwd(dir)
 # ------------------------ #
 
@@ -59,6 +61,11 @@ setwd(dir)
 # ------------------------ #
 # ------------------------ #
 allfhlen2 = read.csv("allfhlen2.csv", header=TRUE)    
+allfhlen2 = allfhlen2 %>% 
+  mutate(geoarea = as.character(geoarea),
+         geoarea = factor(geoarea, levels=c("SAB","MAB","SNE","GB","GoM","ScS")),
+         season = as.character(season),
+         season = factor(season, levels=c("FALL","SUMMER","SPRING","WINTER")))
 AMMO_base = read.csv("AMMO_base.csv", header=TRUE)    
 AMMO_decade = read.csv("AMMO_decade.csv", header=TRUE)      
 AMMO_geoarea = read.csv("AMMO_geoarea.csv", header=TRUE)     
@@ -74,25 +81,41 @@ ammopylen = read_excel("ammopylen.xlsx")
 # to get sample sizes per species to find which species are best candidates for pred-prey analysis
 # ------------------------ #
 # by species
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam) %>% group_by(pdscinam, pdcomnam) %>% summarise(n=n()) %>% arrange(desc(n))
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam) %>% 
+  group_by(pdscinam, pdcomnam) %>% summarise(n=n()) %>% 
+  arrange(desc(n))
+write.csv(x,paste(dir.out,"number_by_species.csv",sep=""))
 
 # by decade
-allfhlen2 %>% dplyr::select(decade) %>% group_by(decade) %>% summarise(n=n()) %>% arrange(desc(n))
+x = allfhlen2 %>% dplyr::select(decade) %>% group_by(decade) %>% 
+  summarise(n=n()) %>% arrange(desc(n))
+write.csv(x,paste(dir.out,"number_by_decade.csv",sep=""))
 
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade) %>% group_by(pdscinam, pdcomnam, decade) %>% 
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade) %>% 
+  group_by(pdscinam, pdcomnam, decade) %>% 
   summarise(n=n()) %>% arrange(pdscinam,decade)
+write.csv(x,paste(dir.out,"number_by_decade_by_species.csv",sep=""))
 
 # by season
-allfhlen2 %>% dplyr::select(season) %>% group_by(season) %>% summarise(n=n()) %>% arrange(desc(n))
+x = allfhlen2 %>% dplyr::select(season) %>% group_by(season) %>% 
+  summarise(n=n()) %>% arrange(desc(n))
+write.csv(x,paste(dir.out,"number_by_season.csv",sep=""))
 
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season) %>% group_by(pdscinam, pdcomnam, season) %>% 
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season) %>% 
+  group_by(pdscinam, pdcomnam, season) %>% 
   summarise(n=n()) %>% arrange(pdscinam,season)
+write.csv(x,paste(dir.out,"number_by_season_by_species.csv",sep=""))
 
 # by geoarea
-allfhlen2 %>% dplyr::select(geoarea) %>% group_by(geoarea) %>% summarise(n=n()) %>% arrange(desc(n))
+x = allfhlen2 %>% dplyr::select(geoarea) %>% group_by(geoarea) %>% 
+  summarise(n=n()) %>% arrange(desc(n))
+write.csv(x,paste(dir.out,"number_by_geoarea.csv",sep=""))
 
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea) %>% group_by(pdscinam, pdcomnam, geoarea) %>% 
+
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea) %>% 
+  group_by(pdscinam, pdcomnam, geoarea) %>% 
   summarise(n=n()) %>% arrange(pdscinam,geoarea)
+write.csv(x,paste(dir.out,"number_by_geoarea_species.csv",sep=""))
 # ------------------------ #
 
 
@@ -101,23 +124,31 @@ allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea) %>% group_by(pdscinam, 
 # decade, season, geographic area 
 # ------------------------ #
 # by species
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, pylen) %>% group_by(pdscinam, pdcomnam) %>% 
-  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% arrange(mean_pylen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, pylen) %>% 
+  group_by(pdscinam, pdcomnam) %>% 
+  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% 
+  arrange(mean_pylen)
+write.csv(x,paste(dir.out,"pylength_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam, pylen, mean)))+
+p = ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam, pylen, mean)))+
   geom_boxplot()+
   #geom_jitter(width=0.1,size=0.1)+
   guides(fill=FALSE)+
   coord_flip()+
   ylab("Sandlance length (mm)")+
-  xlab("Scientific name of predator")+
+  xlab("common name of predator")+
   ggtitle("mean prey length by predator")
+p
+ggsave(filename=paste(dir.out,"pylength_by_species.png",sep=""), plot=p)
 
 # by species by decade
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade, pylen) %>% group_by(pdscinam, pdcomnam, decade) %>% 
-  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% arrange(pdscinam,mean_pylen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade, pylen) %>% 
+  group_by(pdscinam, pdcomnam, decade) %>% 
+  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% 
+  arrange(pdscinam,mean_pylen)
+write.csv(x,paste(dir.out,"pylength_by_decade_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(decade,pylen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(decade,pylen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -127,12 +158,18 @@ ggplot(allfhlen2, aes(decade,pylen,fill=pdcomnam))+
   ylab("Sandlance length (mm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean prey length by predator by decade")
+p
+ggsave(filename=paste(dir.out,"pylength_by_decade_by_species.png",sep=""), plot=p)
+
 
 # by species by season
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season, pylen) %>% group_by(pdscinam, pdcomnam, season) %>% 
-  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% arrange(pdscinam,mean_pylen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season, pylen) %>% 
+  group_by(pdscinam, pdcomnam, season) %>% 
+  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% 
+  arrange(pdscinam,mean_pylen) 
+write.csv(x,paste(dir.out,"pylength_by_season_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(season,pylen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(season,pylen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -142,12 +179,18 @@ ggplot(allfhlen2, aes(season,pylen,fill=pdcomnam))+
   ylab("Sandlance length (mm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean prey length by predator by season")
+p
+ggsave(filename=paste(dir.out,"pylength_by_season_by_species.png",sep=""), plot=p)
+
 
 # by species by geoarea
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea, pylen) %>% group_by(pdscinam, pdcomnam, geoarea) %>% 
-  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% arrange(pdscinam,mean_pylen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea, pylen) %>% 
+  group_by(pdscinam, pdcomnam, geoarea) %>% 
+  summarise(mean_pylen=mean(pylen), var_pylen = var(pylen), sd_pylen = sd(pylen), n=n()) %>% 
+  arrange(pdscinam,mean_pylen)
+write.csv(x,paste(dir.out,"pylength_by_geoarea_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(geoarea,pylen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(geoarea,pylen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -157,6 +200,8 @@ ggplot(allfhlen2, aes(geoarea,pylen,fill=pdcomnam))+
   ylab("Sandlance length (mm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean prey length by predator by geoarea")
+p
+ggsave(filename=paste(dir.out,"pylength_by_geoarea_by_species.png",sep=""), plot=p)
 # ------------------------ #
 
 
@@ -165,8 +210,7 @@ ggplot(allfhlen2, aes(geoarea,pylen,fill=pdcomnam))+
 # then for seasonal, decadal, geographic for size 
 # ------------------------ #
 # by species
-
-ggplot(allfhlen2, aes(reorder(pdcomnam, pdlen, mean),pdlen,fill=reorder(pdcomnam, pdlen, mean)))+
+p = ggplot(allfhlen2, aes(reorder(pdcomnam, pdlen, mean),pdlen,fill=reorder(pdcomnam, pdlen, mean)))+
   geom_boxplot()+
   #geom_jitter(width=0.1,size=0.1)+
   guides(fill=FALSE)+
@@ -174,12 +218,17 @@ ggplot(allfhlen2, aes(reorder(pdcomnam, pdlen, mean),pdlen,fill=reorder(pdcomnam
   ylab("Predator length (cm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean predator length")
+p
+ggsave(filename=paste(dir.out,"pdlength_by_species.png",sep=""), plot=p)
 
 # by decade
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade, pdlen) %>% group_by(pdscinam, pdcomnam, decade) %>% 
-  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% arrange(mean_pdlen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, decade, pdlen) %>% 
+  group_by(pdscinam, pdcomnam, decade) %>% 
+  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% 
+  arrange(mean_pdlen)
+write.csv(x,paste(dir.out,"pdlength_by_decade_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(decade,pdlen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(decade,pdlen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -189,12 +238,17 @@ ggplot(allfhlen2, aes(decade,pdlen,fill=pdcomnam))+
   ylab("predator length (cm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean predator length by predator by decade")
+p
+ggsave(filename=paste(dir.out,"pdlength_by_decade_by_species.png",sep=""), plot=p)
 
 # by season
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season, pdlen) %>% group_by(pdscinam, pdcomnam, season) %>% 
-  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% arrange(mean_pdlen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, season, pdlen) %>% 
+  group_by(pdscinam, pdcomnam, season) %>% 
+  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% 
+  arrange(mean_pdlen) 
+write.csv(x,paste(dir.out,"pdlength_by_season_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(season,pdlen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(season,y=pdlen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -204,12 +258,16 @@ ggplot(allfhlen2, aes(season,pdlen,fill=pdcomnam))+
   ylab("predator length (cm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean predator length by predator by season")
+p
+ggsave(filename=paste(dir.out,"pdlength_by_season_by_species.png",sep=""), plot=p)
 
 # by geoarea
-allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea, pdlen) %>% group_by(pdscinam, pdcomnam, geoarea) %>% 
-  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% arrange(mean_pdlen)
+x = allfhlen2 %>% dplyr::select(pdscinam, pdcomnam, geoarea, pdlen) %>% group_by(pdscinam, pdcomnam, geoarea) %>% 
+  summarise(mean_pdlen=mean(pdlen), var_pdlen = var(pdlen), sd_pdlen = sd(pdlen), n=n()) %>% 
+  arrange(mean_pdlen) 
+write.csv(x,paste(dir.out,"pdlength_by_geoarea_by_species.csv",sep=""))
 
-ggplot(allfhlen2, aes(geoarea,pdlen,fill=pdcomnam))+
+p = ggplot(allfhlen2, aes(geoarea,pdlen,fill=pdcomnam))+
   geom_boxplot()+
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   theme(strip.text = element_text(size=5),
@@ -219,6 +277,8 @@ ggplot(allfhlen2, aes(geoarea,pdlen,fill=pdcomnam))+
   ylab("predator length (cm)")+
   xlab("Scientific name of predator")+
   ggtitle("mean predator length by predator by geoarea")
+p
+ggsave(filename=paste(dir.out,"pdlength_by_geoarea_by_species.png",sep=""), plot=p)
 # ------------------------ #
 
 
@@ -236,18 +296,19 @@ ggplot(allfhlen2, aes(geoarea,pdlen,fill=pdcomnam))+
 #   1-3 year old fish can grow to 37 mm (Scott 1968) -> growth rate increases from the New York Bight to the Nova Scotia banks (Grosslein and Azarovitz 1982)
 
 #line at 35mm
-ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam, pylen, mean)))+
+p = ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam, pylen, mean)))+
   geom_boxplot()+
   guides(fill=FALSE)+
   coord_flip()+
   ylab("Sandlance length (mm)")+
   xlab("Scientific name of predator")+
-  ggtitle("mean prey length by predator")+
+  ggtitle("mean prey length by predator 35mm line ")+
   geom_hline(yintercept=35, size=1, linetype = 3)
-  
+p
+ggsave(filename=paste(dir.out,"pylength_by_pd_35mmline.png",sep=""), plot=p)
 
 # split at 35mm
-allfhlen2 = allfhlen2 %>% mutate(age = ifelse(pylen<=34,"planktonic","semidimersal")) 
+p = allfhlen2 = allfhlen2 %>% mutate(age = ifelse(pylen<=34,"planktonic","semidimersal")) 
 ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam, pylen, mean)))+
   geom_boxplot()+
   guides(fill=FALSE)+
@@ -256,22 +317,29 @@ ggplot(allfhlen2, aes(reorder(pdcomnam, pylen, mean),pylen,fill=reorder(pdcomnam
   ylab("Sandlance length (mm) divided at 35 mm")+
   xlab("Scientific name of predator")+
   ggtitle("mean prey length by predator separated by life stages")
+p
+ggsave(filename=paste(dir.out,"pylength_by_pd_35mmsplit.png",sep=""), plot=p)
 
 #word plot
-ggplot(data,aes(mpylen,rep(0,35), label=pdcomnam)) + geom_point(color="red")+
-  geom_text_repel(aes(label=pdcomnam), angle=90, size=3,
-                  point.padding = unit(0.5, 'lines'),
-                  box.padding = unit(0.4, 'lines'),
-                  segment.color = "darkgrey",
-                  segment.size = 0.5,
-                  force=2,
+x = allfhlen2 %>% dplyr::group_by(pdscinam, pdcomnam) %>% summarise(mean.pylen = mean(pylen))
+p = ggplot(x,aes(mean.pylen, rep(0,35), label=pdcomnam)) + geom_point(color="red")+
+  coord_flip()+
+  geom_text_repel(aes(label=pdcomnam), angle=0, size=4,
+                  point.padding = unit(0.1, 'lines'),
+                  box.padding = unit(0.3, 'lines'),
+                  segment.color = "grey",
+                  segment.size = 0.3,
+                  force=0.1,
                   arrow = arrow(length = unit(0.01, 'npc')))+
-  theme(axis.text.y=element_blank(),axis.ticks=element_blank(),
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(),
         axis.line = element_line(colour = "black"),
         panel.background = element_blank())+
   scale_y_continuous(limits = c(0, 5))+
   geom_vline(xintercept=35, size=1, linetype = 3)+
-  ylab("")+ggtitle("mean SL length per species")
+  ylab("")+xlab("sandlance length (mm) ") + 
+  ggtitle("mean SL length per species")
+p
+ggsave(filename=paste(dir.out,"pylength_by_pd_35mmline_names.png",sep=""), plot=p)
 # ------------------------ #
 
 
@@ -303,13 +371,16 @@ ggplot(allfhlen2, aes(reorder(factor(decade), pylen, mean),pylen,fill=reorder(fa
 # Generate an ordered list of most reliant to least reliant in 
 # overall diets this will likely be a table and a figure.
 # ------------------------ #
-ggplot(AMMO_base, aes(reorder(comname, relmsw), relmsw, color=reorder(comname, relmsw)))+
+p = ggplot(AMMO_base, aes(reorder(comname, relmsw), relmsw, color=reorder(comname, relmsw)))+
   geom_point()+
   coord_flip()+
   ylab("% mass of ammodytes by factor (grams)")+
   xlab("predator name")+
   ggtitle("predator use")+
   theme(legend.position="none")
+p
+ggsave(filename=paste(dir.out,"pd_use_percent_ammo.png",sep=""), plot=p)
+
 # ------------------------ #
 
 
@@ -318,8 +389,9 @@ ggplot(AMMO_base, aes(reorder(comname, relmsw), relmsw, color=reorder(comname, r
 # exploratory analysis for predator size (x axis) vs. prey size (y-axis), 
 # quantile (e.g., 5th & 95th quantiles) and linear (mean) regressions
 # ------------------------ #
-filter(allfhlen2,pdcomnam %in% c("LONGHORN SCULPIN","WINTER SKATE","ALEWIFE","ATLANTIC COD","HADDOCK",
-                                 "WINDOWPANE","STRIPED SEAROBIN","NORTHERN KINGFISH",
+filter(allfhlen2,pdcomnam %in% c("LONGHORN SCULPIN","WINTER SKATE","ALEWIFE",
+                                 "ATLANTIC COD","HADDOCK","WINDOWPANE",
+                                 "STRIPED SEAROBIN","NORTHERN KINGFISH",
                                  "CLEARNOSE SKATE","BLUEFISH","YELLOWTAIL FLOUNDER",
                                  "POLLOCK","STRIPED BASS","SPINY DOGFISH","SILVER HAKE")) %>%
   group_by(pdcomnam) %>% summarise(n=n()) %>% arrange(n) %>% 
@@ -328,65 +400,120 @@ filter(allfhlen2,pdcomnam %in% c("LONGHORN SCULPIN","WINTER SKATE","ALEWIFE","AT
 # removed because n<70 (ALEWIFE, HADDOCK, STRIPED SEAROBIN, NORTHERN KINGFISH, CLEARNOSE SKATE,YELLOWTAIL FLOUNDER, STRIPED BASS)
 
 # high users with enough data
+library(plyr)
+r2<-ddply(allfhlen2,.(pdcomnam),function(x) summary(lm(x$pylen ~ x$pdlen))$r.squared)
+names(r2)<-c("pdcomnam","r2")
 
 # 1) LONGHORN SCULPIN (base n = 142, relmsw = 22.060416)
 data = filter(allfhlen2, pdcomnam %in% "LONGHORN SCULPIN")
-
-r2<-ddply(data,.(cat),function(x) summary(lm(x$yval ~ x$xval))$r.squared)
-names(r2)<-c("cat","r2")
-
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("LONGHORN SCULPIN")+
-  #stat_summary(fun.data=mean_cl_normal) + 
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("LONGHORN SCULPIN")+
+  stat_summary(fun.data=mean_cl_normal) + 
   geom_smooth(method='lm',formula=y~x)+
-  geom_text(r2,aes(color=cat, label = paste("R^2: ", r2, sep="")), x = 25, y = 300, parse = TRUE)
+  annotate("text", x = min(data$pdlen)+2, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% "LONGHORN SCULPIN"], sep=""))
+p
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN",sep=""), plot=p)
 
 # 2) WINTER SKATE (base n = 1525, relmsw = 19.804057)
 data = filter(allfhlen2, pdcomnam %in% "WINTER SKATE")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("WINTER SKATE")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINTER SKATE")+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+6, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% "WINTER SKATE"], sep=""))
+p
+ggsave(filename=paste(dir.out,"WINTER SKATE",sep=""), plot=p)
+
 
 # 3) ATLANTIC COD (base n = 530, relmsw = 17.009978)
-data = filter(allfhlen2, pdcomnam %in% "ATLANTIC COD")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("ATLANTIC COD")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "ATLANTIC COD"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+6, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
 # 4) WINDOWPANE (base n = 177,  relmsw = 6.196971)
-data = filter(allfhlen2, pdcomnam %in% "WINDOWPANE")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("WINDOWPANE")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "WINDOWPANE"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+3, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
 # 5) BLUEFISH  (base n = 79, relmsw = 4.657543)
-data = filter(allfhlen2, pdcomnam %in% "BLUEFISH")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("BLUEFISH")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "BLUEFISH"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+3, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
 # 6) POLLOCK (base n = 89,  relmsw = 3.696919)
-data = filter(allfhlen2, pdcomnam %in% "POLLOCK")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("POLLOCK")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "POLLOCK"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+4, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
 # 7) SPINY DOGFISH (base n = 798,  relmsw = 2.307634)
-data = filter(allfhlen2, pdcomnam %in% "SPINY DOGFISH")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("SPINY DOGFISH")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "SPINY DOGFISH"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+4, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
 # 8) SILVER HAKE (base n = 501,  relmsw = 2.095593)
-data = filter(allfhlen2, pdcomnam %in% "SILVER HAKE")
-ggplot(data, aes(pdlen, pylen))+geom_point()+xlab("predator size (cm)")+ylab("prey size (mm)")+ggtitle("SILVER HAKE")+
-  #stat_summary(fun.data=mean_cl_normal) + 
-  geom_smooth(method='lm',formula=y~x)
+spp = "SILVER HAKE"
+data = filter(allfhlen2, pdcomnam %in% spp)
+p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle(spp)+
+  stat_summary(fun.data=mean_cl_normal) + 
+  geom_smooth(method='lm',formula=y~x)+
+  annotate("text", x = min(data$pdlen)+4, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
+p
+ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
+
 
 # all
-data = filter(allfhlen2, pdcomnam %in% c("LONGHORN SCULPIN","WINTER SKATE","ATLANTIC COD",
-                                         "WINDOWPANE","BLUEFISH","POLLOCK","SPINY DOGFISH",
-                                         "SILVER HAKE"))
-ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
+data = filter(allfhlen2, pdcomnam %in% c("LONGHORN SCULPIN","WINTER SKATE",
+                                         "ATLANTIC COD","WINDOWPANE",
+                                         "BLUEFISH","POLLOCK",
+                                         "SPINY DOGFISH","SILVER HAKE"))
+p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
   geom_point()+
   facet_wrap(~as.factor(pdcomnam), nrow=4)+
   guides(fill=FALSE)+
@@ -394,6 +521,9 @@ ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
   ylab("prey length (mm)")+
   xlab("predator length (cm)")+
   ggtitle("predator size vs. prey size")
+p
+ggsave(filename=paste("predator size vs. prey size.png",sep=""), plot=p)
+
 # ------------------------ #
 
 
