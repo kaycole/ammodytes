@@ -406,6 +406,7 @@ names(r2)<-c("pdcomnam","r2")
 
 # 1) LONGHORN SCULPIN (base n = 142, relmsw = 22.060416)
 data = filter(allfhlen2, pdcomnam %in% "LONGHORN SCULPIN")
+
 p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   xlab("predator size (cm)")+
   ylab("prey size (mm)")+
@@ -414,7 +415,36 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   geom_smooth(method='lm',formula=y~x)+
   annotate("text", x = min(data$pdlen)+2, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% "LONGHORN SCULPIN"], sep=""))
 p
-ggsave(filename=paste(dir.out,"LONGHORN SCULPIN",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("LONGHORN SCULPIN")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("LONGHORN SCULPIN")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("LONGHORN SCULPIN")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN by geoare",sep=""), plot=p)
 
 # 2) WINTER SKATE (base n = 1525, relmsw = 19.804057)
 data = filter(allfhlen2, pdcomnam %in% "WINTER SKATE")
@@ -522,7 +552,17 @@ p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
   xlab("predator length (cm)")+
   ggtitle("predator size vs. prey size")
 p
-ggsave(filename=paste("predator size vs. prey size.png",sep=""), plot=p)
+ggsave(filename=paste(dir.out,"predator size vs. prey size.png",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
+  geom_point()+
+  facet_wrap(~as.factor(pdcomnam)+as.factor(season), nrow=8)+
+  guides(fill=FALSE)+
+  geom_smooth(method='lm',formula=y~x)+
+  ylab("prey length (mm)")+
+  xlab("predator length (cm)")+
+  ggtitle("predator size vs. prey size")
+p
 
 # ------------------------ #
 
