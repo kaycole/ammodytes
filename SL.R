@@ -351,17 +351,17 @@ ggsave(filename=paste(dir.out,"pylength_by_pd_35mmline_names.png",sep=""), plot=
 # Regression analyses to be conducted to determine if the mean size 
 # of SL has changed over time within and across predators. 
 # ------------------------ #
-
-# using only predators that have enough points (n>70)***
-ggplot(allfhlen2, aes(reorder(factor(decade), pylen, mean),pylen,fill=reorder(factor(decade), pylen, mean)))+
-  geom_boxplot()+
-  #geom_jitter(width=0.1,size=0.1)+
-  guides(fill=FALSE)+
-  coord_flip()+
-  ylab("Sandlance length (mm)")+
-  xlab("Decade")
-# ------------------------ #
-
+# 
+# # using only predators that have enough points (n>70)***
+# ggplot(allfhlen2, aes(reorder(factor(decade), pylen, mean),pylen,fill=reorder(factor(decade), pylen, mean)))+
+#   geom_boxplot()+
+#   #geom_jitter(width=0.1,size=0.1)+
+#   guides(fill=FALSE)+
+#   coord_flip()+
+#   ylab("Sandlance length (mm)")+
+#   xlab("Decade")
+# # ------------------------ #
+# 
 
 # ------------------------ #
 # determine which predators rely most 
@@ -415,6 +415,7 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   geom_smooth(method='lm',formula=y~x)+
   annotate("text", x = min(data$pdlen)+2, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% "LONGHORN SCULPIN"], sep=""))
 p
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN",sep=""), plot=p)
 
 p = ggplot(data, aes(pdlen, pylen,fill=season))+
   geom_point()+
@@ -444,7 +445,7 @@ p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
   ggtitle("LONGHORN SCULPIN")+
   geom_smooth(method='lm',formula=y~x)
 p
-ggsave(filename=paste(dir.out,"LONGHORN SCULPIN by geoare",sep=""), plot=p)
+ggsave(filename=paste(dir.out,"LONGHORN SCULPIN by geoarea",sep=""), plot=p)
 
 # 2) WINTER SKATE (base n = 1525, relmsw = 19.804057)
 data = filter(allfhlen2, pdcomnam %in% "WINTER SKATE")
@@ -458,6 +459,35 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
 p
 ggsave(filename=paste(dir.out,"WINTER SKATE",sep=""), plot=p)
 
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINTER SKATE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINTER SKATE by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINTER SKATE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINTER SKATE by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINTER SKATE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINTER SKATE by geoarea",sep=""), plot=p)
 
 # 3) ATLANTIC COD (base n = 530, relmsw = 17.009978)
 spp = "ATLANTIC COD"
@@ -472,6 +502,36 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("ATLANTIC COD")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"ATLANTIC COD by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("ATLANTIC COD")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"ATLANTIC COD by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("ATLANTIC COD")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"ATLANTIC COD by geoarea",sep=""), plot=p)
+
 # 4) WINDOWPANE (base n = 177,  relmsw = 6.196971)
 spp = "WINDOWPANE"
 data = filter(allfhlen2, pdcomnam %in% spp)
@@ -484,6 +544,37 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   annotate("text", x = min(data$pdlen)+3, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINDOWPANE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINDOWPANE by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINDOWPANE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINDOWPANE by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("WINDOWPANE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"WINDOWPANE by geoarea",sep=""), plot=p)
+
 
 # 5) BLUEFISH  (base n = 79, relmsw = 4.657543)
 spp = "BLUEFISH"
@@ -498,6 +589,37 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("BLUEFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"BLUEFISH by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("BLUEFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"BLUEFISH by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("BLUEFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"BLUEFISH by geoarea",sep=""), plot=p)
+
+
 # 6) POLLOCK (base n = 89,  relmsw = 3.696919)
 spp = "POLLOCK"
 data = filter(allfhlen2, pdcomnam %in% spp)
@@ -510,6 +632,37 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   annotate("text", x = min(data$pdlen)+4, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("POLLOCK")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"POLLOCK by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("POLLOCK")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"POLLOCK by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("POLLOCK")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"POLLOCK by geoarea",sep=""), plot=p)
+
 
 # 7) SPINY DOGFISH (base n = 798,  relmsw = 2.307634)
 spp = "SPINY DOGFISH"
@@ -524,6 +677,37 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
 
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SPINY DOGFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SPINY DOGFISH by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SPINY DOGFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SPINY DOGFISH by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SPINY DOGFISH")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SPINY DOGFISH by geoarea",sep=""), plot=p)
+
+
 # 8) SILVER HAKE (base n = 501,  relmsw = 2.095593)
 spp = "SILVER HAKE"
 data = filter(allfhlen2, pdcomnam %in% spp)
@@ -536,6 +720,36 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   annotate("text", x = min(data$pdlen)+4, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% spp], sep=""))
 p
 ggsave(filename=paste(dir.out,spp,".png",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=season))+
+  geom_point()+
+  facet_wrap(~as.factor(season), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SILVER HAKE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SILVER HAKE by season",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=decade))+
+  geom_point()+
+  facet_wrap(~as.factor(decade), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SILVER HAKE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SILVER HAKE by decade",sep=""), plot=p)
+
+p = ggplot(data, aes(pdlen, pylen,fill=geoarea))+
+  geom_point()+
+  facet_wrap(~as.factor(geoarea), nrow=2)+
+  xlab("predator size (cm)")+
+  ylab("prey size (mm)")+
+  ggtitle("SILVER HAKE")+
+  geom_smooth(method='lm',formula=y~x)
+p
+ggsave(filename=paste(dir.out,"SILVER HAKE by geoarea",sep=""), plot=p)
 
 
 # all
@@ -554,15 +768,15 @@ p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
 p
 ggsave(filename=paste(dir.out,"predator size vs. prey size.png",sep=""), plot=p)
 
-p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
-  geom_point()+
-  facet_wrap(~as.factor(pdcomnam)+as.factor(season), nrow=8)+
-  guides(fill=FALSE)+
-  geom_smooth(method='lm',formula=y~x)+
-  ylab("prey length (mm)")+
-  xlab("predator length (cm)")+
-  ggtitle("predator size vs. prey size")
-p
+# p = ggplot(data, aes(pdlen,pylen,fill=pdcomnam))+
+#   geom_point()+
+#   facet_wrap(~as.factor(pdcomnam)+as.factor(season), nrow=8)+
+#   guides(fill=FALSE)+
+#   geom_smooth(method='lm',formula=y~x)+
+#   ylab("prey length (mm)")+
+#   xlab("predator length (cm)")+
+#   ggtitle("predator size vs. prey size")
+# p
 
 # ------------------------ #
 
