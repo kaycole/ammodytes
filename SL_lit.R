@@ -20,6 +20,62 @@ names(sl) = c("comname","lesser","mid","greater","diet.metric","prey.size","loca
               "location.local","years","seasons","ref","notes")
 sl = as.data.frame(sl[1:(which(is.na(sl$comname))[1]-1),1:12]) # issues with NA column names and rows
 sl[sl=="N/A"] = NA
+
+# break rows with more than one diet metric
+# scup
+to.add = sl[sl$comname %in% "Scup",]
+to.add = mutate(to.add, seasons = "annual", mid=NA)
+sl = mutate(sl, seasons = ifelse(comname %in% "Scup","summer",seasons),
+            lesser = ifelse(comname %in% "Scup",NA,lesser)) %>%
+  rbind(.,to.add)
+rm(to.add)
+# Northern shortfin squid
+to.add = sl[sl$comname %in% "Northern shortfin squid",]
+to.add = mutate(to.add, mid=49, lesser=NA)
+sl = mutate(sl, lesser = ifelse(comname %in% "Northern shortfin squid",1,lesser),
+            mid = ifelse(comname %in% "Northern shortfin squid",NA,mid)) %>%
+  rbind(.,to.add)
+rm(to.add)
+# lesser +/-
+to.add = sl[grep("+/-",sl$lesser),]
+to.add1 = to.add %>% mutate(lesser = abs(apply(cbind(as.numeric(sapply(strsplit(lesser,"+/-",fixed=TRUE),head,1)), 
+                                                 as.numeric(sapply(strsplit(lesser,"+/-",fixed=TRUE),tail,1))), 1, sum)))
+to.add2 = to.add %>% mutate(lesser = abs(apply(cbind(as.numeric(sapply(strsplit(lesser,"+/-",fixed=TRUE),head,1)), 
+                                                 as.numeric(sapply(strsplit(lesser,"+/-",fixed=TRUE),tail,1))), 1, diff)))
+sl = rbind(sl,to.add1,to.add2)
+rm(to.add,to.add1,to.add2)
+# mid +/-
+to.add = sl[grep("+/-",sl$mid),]
+to.add1 = to.add %>% mutate(mid = abs(apply(cbind(as.numeric(sapply(strsplit(mid,"+/-",fixed=TRUE),head,1)), 
+                                                 as.numeric(sapply(strsplit(mid,"+/-",fixed=TRUE),tail,1))), 1, sum)))
+to.add2 = to.add %>% mutate(mid = abs(apply(cbind(as.numeric(sapply(strsplit(mid,"+/-",fixed=TRUE),head,1)), 
+                                                 as.numeric(sapply(strsplit(mid,"+/-",fixed=TRUE),tail,1))), 1, diff)))
+sl = rbind(sl,to.add1,to.add2)
+rm(to.add,to.add1,to.add2)
+# greater +/-
+to.add = sl[grep("+/-",sl$greater),]
+to.add1 = to.add %>% mutate(greater = abs(apply(cbind(as.numeric(sapply(strsplit(greater,"+/-",fixed=TRUE),head,1)), 
+                                              as.numeric(sapply(strsplit(greater,"+/-",fixed=TRUE),tail,1))), 1, sum)))
+to.add2 = to.add %>% mutate(greater = abs(apply(cbind(as.numeric(sapply(strsplit(greater,"+/-",fixed=TRUE),head,1)), 
+                                              as.numeric(sapply(strsplit(greater,"+/-",fixed=TRUE),tail,1))), 1, diff)))
+sl = rbind(sl,to.add1,to.add2)
+rm(to.add,to.add1,to.add2)
+# mutate
+sl = mutate(sl,
+            lesser = gsub("<","",lesser),
+            lesser = gsub("% (annual)","",lesser,fixed=TRUE),
+            mid = gsub("% (summer)","",mid,fixed=TRUE),
+            lesser = sapply(strsplit(lesser,"+/-",fixed=TRUE),head,1),
+            greater = sapply(strsplit(greater,"+/-",fixed=TRUE),head,1),
+            mid = sapply(strsplit(mid,"+/-",fixed=TRUE),head,1))
+# sturgeon
+to.add = sl[grep("-",sl$greater),]
+to.add = mutate(greater = as.numeric(sapply(strsplit(greater,"-"),head,1)))
+sl = mutate(greater = as.numeric(sapply(strsplit(greater,"-"),tail,1))) %>%
+  rbind(.,to.add)
+rm(to.add)
+ 
+# format
 sl = mutate(sl, diet = NA, 
             sciname = comname,
             sciname = replace(sciname, sciname %in% "American plaice","Pleuronectes platessa"),  
@@ -42,16 +98,6 @@ sl = mutate(sl, diet = NA,
             sciname = replace(sciname, sciname %in% "White hake","Urophycis tenuis"),  
             sciname = replace(sciname, sciname %in% "Winter Skate","Leucoraja ocellata"),
             sciname = replace(sciname, sciname %in% "Yellowfin tuna","Thunnus albacares"),
-            lesser = gsub("<","",lesser),
-            lesser = sapply(strsplit(lesser,"+/-",fixed="TRUE"),head,1),
-            greater = sapply(strsplit(greater,"+/-",fixed="TRUE"),head,1),
-            mid = sapply(strsplit(mid,"+/-",fixed="TRUE"),head,1),
-            lesser = apply(cbind(as.numeric(sapply(strsplit(lesser,"-"),head,1)), 
-                                 as.numeric(sapply(strsplit(lesser,"-"),tail,1))), 1, mean, na.rm=TRUE),
-            mid = apply(cbind(as.numeric(sapply(strsplit(mid,"-"),head,1)), 
-                                 as.numeric(sapply(strsplit(mid,"-"),tail,1))), 1, mean, na.rm=TRUE),
-            greater = apply(cbind(as.numeric(sapply(strsplit(greater,"-"),head,1)), 
-                                 as.numeric(sapply(strsplit(greater,"-"),tail,1))), 1, mean, na.rm=TRUE),
             diet = apply(cbind(lesser, mid, greater),1,mean, na.rm=TRUE))
 
 mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
@@ -67,6 +113,18 @@ mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TR
 # plot
 # ------------ #
 ggplot(mean.sl, aes(mean.diet,reorder(sciname,mean.diet),col=sciname))+geom_point()+theme_bw()+
-  ggtitle("Mean diet in literature review")+ xlab("Mean diet") + ylab("Species")+
+  ggtitle("Mean percent of ammodytes in diet\nfrom the literature review")+ xlab("Mean percent of diet") + ylab("Species")+
   theme(legend.position = "none")
+
+ggplot()+
+  geom_boxplot(data = sl, aes(x = reorder(sciname, diet, fun=mean, na.rm=TRUE), y = diet, 
+                       col=sciname, fill=sciname, alpha= 0.1))+
+  geom_point(data = sl, aes(x=sciname, y=diet, col=sciname))+
+  scale_fill_hue(l=98, c=100)+
+  theme_bw()+
+  ggtitle("Percent of ammodytes in diet\nfrom the literature review")+ 
+  ylab("Percent of diet") + 
+  xlab("Species")+
+  theme(legend.position = "none")+
+  coord_flip()
 # ------------ #
