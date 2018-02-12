@@ -70,8 +70,8 @@ sl = mutate(sl,
             mid = sapply(strsplit(mid,"+/-",fixed=TRUE),head,1))
 # sturgeon
 to.add = sl[grep("-",sl$greater),]
-to.add = mutate(greater = as.numeric(sapply(strsplit(greater,"-"),head,1)))
-sl = mutate(greater = as.numeric(sapply(strsplit(greater,"-"),tail,1))) %>%
+to.add = mutate(to.add, greater = as.numeric(sapply(strsplit(greater,"-"),tail,1)))
+sl = mutate(sl, greater = as.numeric(sapply(strsplit(greater,"-"),head,1))) %>%
   rbind(.,to.add)
 rm(to.add)
  
@@ -98,7 +98,10 @@ sl = mutate(sl, diet = NA,
             sciname = replace(sciname, sciname %in% "White hake","Urophycis tenuis"),  
             sciname = replace(sciname, sciname %in% "Winter Skate","Leucoraja ocellata"),
             sciname = replace(sciname, sciname %in% "Yellowfin tuna","Thunnus albacares"),
-            diet = apply(cbind(lesser, mid, greater),1,mean, na.rm=TRUE))
+            lesser = as.numeric(lesser),
+            mid= as.numeric(mid),
+            greater=as.numeric(greater),
+            diet = apply(cbind(lesser, mid, greater), 1, mean, na.rm=TRUE))
 
 mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
 
@@ -106,25 +109,61 @@ mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TR
 #spring - march, april, may
 #fall - sept, oct, nov
 #winter - dec, jan, feb
+sl = sl %>% mutate(seasons = tolower(seasons),
+                   seasons = replace(seasons, seasons %in% c("year round","summer, spring, fall, winter","jan, feb, ap, june, jul, aug, oct, nov, dec"), "annual"),
+                   seasons = replace(seasons, seasons %in% c("spring, summer"), "spring and summer"),
+                   seasons = replace(seasons, seasons %in% c("july/ august"), "summer"),
+                   seasons = replace(seasons, seasons %in% c("jul, aug, sept, nov","july-nov.","july-oct.","june-october",
+                                                             "summer - fall","summer, fall"),"summer and fall"))
 # ------------ #
 
 
 # ------------ #
 # plot
 # ------------ #
+#season
+ggplot()+
+  geom_point(data = sl, aes(x=seasons, y=sciname, col=seasons))+
+  scale_fill_hue(l=98, c=100)+
+  theme_bw()+
+  labs(title = "Diet literature per species by season", subtitle = "from the literature review")+ 
+  ylab("Percent of diet") + 
+  xlab("Species")+
+  theme(legend.position = "none", axis.text.x = element_text(angle =20, hjust = 1))
+
+#mean
 ggplot(mean.sl, aes(mean.diet,reorder(sciname,mean.diet),col=sciname))+geom_point()+theme_bw()+
   ggtitle("Mean percent of ammodytes in diet\nfrom the literature review")+ xlab("Mean percent of diet") + ylab("Species")+
   theme(legend.position = "none")
 
+# box means
 ggplot()+
   geom_boxplot(data = sl, aes(x = reorder(sciname, diet, fun=mean, na.rm=TRUE), y = diet, 
                        col=sciname, fill=sciname, alpha= 0.1))+
   geom_point(data = sl, aes(x=sciname, y=diet, col=sciname))+
   scale_fill_hue(l=98, c=100)+
   theme_bw()+
-  ggtitle("Percent of ammodytes in diet\nfrom the literature review")+ 
+  labs(title="Percent of ammodytes in diet",subtitle="from the literature review")+ 
   ylab("Percent of diet") + 
   xlab("Species")+
   theme(legend.position = "none")+
   coord_flip()
 # ------------ #
+
+# bluefin age
+bf = sl %>% filter(sciname %in% 'Thunnus thynnus') %>% 
+  mutate(age = ifelse(comname %in% c("Bluefin tuna (<185cm)","Bluefin tuna age 1-3"), "Juvenile (1-3 years old or <185cm)","Adult (4-5 years old or >185cm)"),
+         age = ifelse(comname %in% c("Bluefin tuna"), "Undefined", age)) %>% arrange(age)
+
+ggplot()+
+  geom_boxplot(data = bf, aes(x = reorder(age, diet, fun=mean, na.rm=TRUE), y = diet, 
+                              col=age, fill=age, alpha= 0.1))+
+  geom_point(data = bf, aes(x=age, y=diet, col=age))+
+  scale_fill_hue(l=98, c=100)+
+  theme_bw()+
+  labs(title="Percent of ammodytes in diet for Thunnus thynnus",subtitle="from the literature review")+ 
+  ylab("Percent of diet") + 
+  xlab("Age/Size range")+
+  theme(legend.position = "none")+
+  coord_flip()
+  
