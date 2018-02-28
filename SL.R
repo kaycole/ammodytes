@@ -11,6 +11,7 @@ library(readxl)
 require(ggplot2)
 require(Hmisc)
 require(ggrepel)
+library(quantreg)
 # ------------------------ #
 
 
@@ -407,6 +408,7 @@ names(r2)<-c("pdcomnam","r2")
 # 1) LONGHORN SCULPIN (base n = 142, relmsw = 22.060416)
 data = filter(allfhlen2, pdcomnam %in% "LONGHORN SCULPIN")
 
+# regression
 p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   xlab("predator size (cm)")+
   ylab("prey size (mm)")+
@@ -416,6 +418,24 @@ p = ggplot(data, aes(pdlen, pylen))+geom_point()+
   annotate("text", x = min(data$pdlen)+2, y = max(data$pylen)+100, label = paste("R^2:  ", r2$r2[r2$pdcomnam %in% "LONGHORN SCULPIN"], sep=""))
 p
 ggsave(filename=paste(dir.out,"LONGHORN SCULPIN",sep=""), plot=p)
+
+# quanile regression
+# p = ggplot(data, aes(pdlen, pylen))+geom_point()+
+#   xlab("predator size (cm)")+
+#   ylab("prey size (mm)")+
+#   ggtitle("LONGHORN SCULPIN quantile regression")+
+#   geom_quantile(formula = y~x, quantiles = 0.05, col="indianred",size=2,alpha=0.5)+
+#   geom_quantile(formula = y~x, quantiles = 0.1, col="blue",size=2,alpha=0.5)+
+#   geom_quantile(formula = y~x, quantiles = 0.25, col="gold",size=2,alpha=0.5)+ 
+#   geom_quantile(formula = y~x, quantiles = 0.5, col="black",size=2,alpha=0.5)+ 
+#   geom_quantile(formula = y~x, quantiles = 0.75, col="gold",size=2,alpha=0.5)+
+#   geom_quantile(formula = y~x, quantiles = 0.9, col="blue",size=2,alpha=0.5)+
+#   geom_quantile(formula = y~x, quantiles = 0.95, col="indianred",size=2,alpha=0.5)+ 
+#   
+#   scale_colour_manual(values = c('red','black','gold'))+ 
+#   theme_bw()
+# p
+# ggsave(filename=paste(dir.out,"LONGHORN SCULPIN qr",sep=""), plot=p)
 
 p = ggplot(data, aes(pdlen, pylen,fill=season))+
   geom_point()+
@@ -780,4 +800,92 @@ ggsave(filename=paste(dir.out,"predator size vs. prey size.png",sep=""), plot=p)
 
 # ------------------------ #
 
+
+# --------------------- #
+# summary table for Michelle
+# --------------------- #
+# a table listing all the preds that were found to consume SL 
+# with basic info on % of total diet, size range of each pred, 
+# seasons and sub-regions SL were present in diets (latter two 
+# can be presence/absence) 
+#
+# reminder: relmsw is the best metric to gauge predator use since 
+# it considers the mass of prey relative to other prey (% or proportion of diet).  
+
+sumallfhlen2 = allfhlen2 %>% 
+  dplyr::group_by(pdscinam) %>%
+  dplyr::summarise(comname = first(pdcomnam),
+            minpdlen = min(pdlen, na.rm = TRUE),
+            meanpdlen = mean(pdlen, na.rm = TRUE), 
+            maxpdlen = max(pdlen, na.rm = TRUE),
+            minpylen = min(pylen, na.rm = TRUE),
+            meanpylen = mean(pylen, na.rm = TRUE), 
+            maxpylen = max(pylen, na.rm = TRUE),
+            SAB = ifelse(any(geoarea %in% 'SAB'),'yes','no'),
+            MAB = ifelse(any(geoarea %in% 'MAB'),'yes','no'),
+            SNE = ifelse(any(geoarea %in% 'SNE'),'yes','no'),
+            GB = ifelse(any(geoarea %in% 'GB'),'yes','no'),
+            GoM = ifelse(any(geoarea %in% 'GoM'),'yes','no'),
+            ScS = ifelse(any(geoarea %in% 'ScS'),'yes','no'),
+            FALL = ifelse(any(season %in% 'FALL'),'yes','no'),
+            SUMMER = ifelse(any(season %in% 'SUMMER'),'yes','no'),
+            SPRING = ifelse(any(season %in% 'SPRING'),'yes','no'),
+            WINTER = ifelse(any(season %in% 'WINTER'),'yes','no'),
+            d1970s = ifelse(any(decade %in% '1970s'),'yes','no'),
+            d1980s = ifelse(any(decade %in% '1980s'),'yes','no'),
+            d1990s = ifelse(any(decade %in% '1990s'),'yes','no'),
+            d2000s = ifelse(any(decade %in% '2000s'),'yes','no'),
+            d2010s = ifelse(any(decade %in% '2010s'),'yes','no'))
+
+
+sumgeoarea = AMMO_geoarea %>% 
+  dplyr::group_by(sciname) %>% 
+  dplyr::summarise(comname = first(comname),
+            SAB = ifelse(any(geoarea %in% 'SAB'),'yes','no'),
+            MAB = ifelse(any(geoarea %in% 'MAB'),'yes','no'),
+            SNE = ifelse(any(geoarea %in% 'SNE'),'yes','no'),
+            GB = ifelse(any(geoarea %in% 'GB'),'yes','no'),
+            GoM = ifelse(any(geoarea %in% 'GoM'),'yes','no'),
+            ScS = ifelse(any(geoarea %in% 'ScS'),'yes','no'))
+         
+sumseasons = AMMO_season %>% 
+  dplyr::group_by(sciname) %>% 
+  dplyr::summarise(comname = first(comname),
+         FALL = ifelse(any(season %in% 'FALL'),'yes','no'),
+         SUMMER = ifelse(any(season %in% 'SUMMER'),'yes','no'),
+         SPRING = ifelse(any(season %in% 'SPRING'),'yes','no'),
+         WINTER = ifelse(any(season %in% 'WINTER'),'yes','no'))
+         
+sumdecades = AMMO_decade %>% 
+  dplyr::group_by(sciname) %>% 
+  dplyr::summarise(comname = first(comname),
+         d1970s = ifelse(any(decade %in% '1970s'),'yes','no'),
+         d1980s = ifelse(any(decade %in% '1980s'),'yes','no'),
+         d1990s = ifelse(any(decade %in% '1990s'),'yes','no'),
+         d2000s = ifelse(any(decade %in% '2000s'),'yes','no'),
+         d2010s = ifelse(any(decade %in% '2010s'),'yes','no'))
+
+
+sumtable = select(AMMO_base, sciname, comname, relmsw) %>% 
+  arrange(-relmsw) %>% 
+  left_join(., select(sumallfhlen2,-pdscinam), by="comname")
+
+sumtable2 = select(AMMO_base, sciname, comname, relmsw) %>% 
+  arrange(-relmsw) %>% 
+  left_join(., select(sumallfhlen2, comname, minpylen, meanpylen, maxpylen, minpdlen, meanpdlen, maxpdlen), by="comname") %>% 
+  left_join(., select(sumgeoarea,-sciname), by="comname") %>% 
+  left_join(., select(sumseasons,-sciname), by="comname") %>% 
+  left_join(., select(sumdecades,-sciname), by="comname")
+
+sumtable = filter(sumtable, !comname %in% c("ROSETTE SKATE","ATLANTIC CROAKER",
+                                            "SMOOTH SKATE","AMERICAN SHAD",
+                                            "NORTHERN SAND LANCE","LONGFIN SQUID")) %>% 
+  bind_rows(., filter(sumtable2, comname %in% c("ROSETTE SKATE","ATLANTIC CROAKER",
+                                               "SMOOTH SKATE","AMERICAN SHAD",
+                                               "NORTHERN SAND LANCE","LONGFIN SQUID"))) %>% 
+  arrange(-relmsw)
+
+rm(sumtable2)
+write.csv(sumtable, paste(dir.out, "summary_for_Michelle_Feb2018.csv"))  
+# --------------------- #
 
