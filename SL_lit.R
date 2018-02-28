@@ -151,7 +151,7 @@ ggplot()+
 # ------------ #
 
 # bluefin age
-bf = sl %>% filter(sciname %in% 'Thunnus thynnus') %>% 
+bf = sl %>% filter(sciname %in% 'Thunnus thynnus') %>%
   mutate(age = ifelse(comname %in% c("Bluefin tuna (<185cm)","Bluefin tuna age 1-3"), "Juvenile (1-3 years old or <185cm)","Adult (4-5 years old or >185cm)"),
          age = ifelse(comname %in% c("Bluefin tuna"), "Undefined", age)) %>% arrange(age)
 
@@ -164,6 +164,40 @@ ggplot()+
   labs(title="Percent of ammodytes in diet for Thunnus thynnus",subtitle="from the literature review")+ 
   ylab("Percent of diet") + 
   xlab("Age/Size range")+
+  theme(legend.position = "none")+
+  coord_flip()
+#
+#
+bf = sl %>% filter(sciname %in% 'Thunnus thynnus') %>% 
+  mutate(age = "Undefined",
+         age = ifelse(comname %in% c("Bluefin tuna age 1-3"), "Age 1-3 yo", age),
+         age = ifelse(comname %in% c("Bluefin tuna age 4-5"), "Age 4-5 yo", age),
+         sizeclass = "Undefined",
+         sizeclass = ifelse(comname %in% c("Bluefin tuna (<185cm)"), "Less than 185 cm", sizeclass),
+         sizeclass = ifelse(comname %in% c("Bluefin tuna (>185cm)"), "Greater than 185 cm", sizeclass)) %>% 
+  arrange(age)
+
+ggplot()+
+  geom_boxplot(data = bf, aes(x = reorder(age, diet, fun=mean, na.rm=TRUE), y = diet, 
+                              col=age, fill=age, alpha= 0.1))+
+  geom_point(data = bf, aes(x=age, y=diet, col=age))+
+  scale_fill_hue(l=98, c=100)+
+  theme_bw()+
+  labs(title="Percent of ammodytes in diet for Thunnus thynnus by Age group",subtitle="from the literature review")+ 
+  ylab("Percent of diet") + 
+  xlab("Age range")+
+  theme(legend.position = "none")+
+  coord_flip()
+
+ggplot()+
+  geom_boxplot(data = bf, aes(x = reorder(sizeclass, diet, fun=mean, na.rm=TRUE), y = diet, 
+                              col=sizeclass, fill=sizeclass, alpha= 0.1))+
+  geom_point(data = bf, aes(x=sizeclass, y=diet, col=sizeclass))+
+  scale_fill_hue(l=98, c=100)+
+  theme_bw()+
+  labs(title="Percent of ammodytes in diet for Thunnus thynnus by size group",subtitle="from the literature review")+ 
+  ylab("Percent of diet") + 
+  xlab("Size range")+
   theme(legend.position = "none")+
   coord_flip()
   
