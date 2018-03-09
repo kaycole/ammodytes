@@ -21,6 +21,9 @@ names(sl) = c("comname","lesser","mid","greater","diet.metric","prey.size","loca
 sl = as.data.frame(sl[1:(which(is.na(sl$comname))[1]-1),1:12]) # issues with NA column names and rows
 sl[sl=="N/A"] = NA
 
+# add record number before spitting
+sl$id = seq(1:length(sl$comname))
+  
 # break rows with more than one diet metric
 # scup
 to.add = sl[sl$comname %in% "Scup",]
@@ -101,7 +104,40 @@ sl = mutate(sl, diet = NA,
             lesser = as.numeric(lesser),
             mid= as.numeric(mid),
             greater=as.numeric(greater),
-            diet = apply(cbind(lesser, mid, greater), 1, mean, na.rm=TRUE))
+            diet = apply(cbind(lesser, mid, greater), 1, mean, na.rm=TRUE),
+            diet.metric = replace(diet.metric, diet.metric %in% "?","undefined"),
+            location.region = replace(location.region, location.region %in% c("Gulf of Maine","NWA/ GOM ","NWA/ GOM"), "GOM"),
+            location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "MAB"),
+            location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "SNE"),
+            location.region = replace(location.region, location.region %in% c("Scotian Shelf"), "ScS"),
+            location.region = replace(location.region, location.region %in% c("Newfoundland","Grand Bank"), "GrB"), #check newfoundland - could be different
+            location.region = replace(location.region, location.region %in% "Gulf of St. Lawrence", "GSL"),
+            location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE"),"NWA"),
+            location.region2 = location.region,
+            location.region2 = replace(location.region2, location.region2 %in% c("GSL","GrB","ScS"),"Canada"))
+            #diet.metric = replace(diet.metric, diet.metric %in% "otoliths","O"))
+# indicate if the study measured %mass/volume, % frequency of occurrence, or %number, 
+# %Index of Relative Importance (IRI) 
+# M = mass
+# V = volume
+# W = weight
+# FO = frequency of occurrence
+# IRI = Index of relative importance
+# N = number?
+# C:N = carbon to nitrogren isotopes
+# otoliths = might also be chemistry like C:N
+# O = occurrence?
+
+
+
+mean.sl.by.paper = sl %>% group_by(sciname,id) %>% 
+  summarize(mean.diet = mean(diet, na.rm=TRUE),
+            sd = sd(diet, na.rm=TRUE),
+            n = n(),
+            diet.metric = first(diet.metric),
+            location.region = first(location.region),
+            location.region2 = first(location.region2)) %>%
+  mutate(error = qnorm(0.95)*sd/sqrt(n))
 
 mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
 
@@ -200,4 +236,19 @@ ggplot()+
   xlab("Size range")+
   theme(legend.position = "none")+
   coord_flip()
+  
+# ----------------- #
+# means with color = location, shape = metric
+ggplot(data = mean.sl.by.paper, aes(y = mean.diet, x = reorder(sciname, mean.diet), 
+                                    col=location.region, shape=diet.metric, 
+                                    size = mean.diet, stroke = 2))+
+  geom_point()+
+  scale_shape_manual(values=1:length(unique(mean.sl.by.paper$diet.metric))) +
+  coord_flip()+
+  #geom_errorbar(data = mean.sl.by.paper, aes(ymin = (mean.diet - error), ymax = (mean.diet + error)), 
+  #              width=.2, size = 1)+
+  theme_bw()+
+  ggtitle('Proportion of ammodytes in diet from the literature review')+
+  ylab('mean proportion of ammodytes in diet')+
+  xlab('species')
   
