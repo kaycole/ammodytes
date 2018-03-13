@@ -322,7 +322,7 @@ ggsave(filename="C:/Users/kecoleman/Documents/SL/mean_prey_size_by_species.png",
 # scatter all pred size and all prey size
 # with quant. reg at 1 and 99 
 # ------------------------ #
-taus = c(0.1,0.99)
+taus = c(0.01,0.99)
 p = ggplot(allfhlen2, aes(pdlen, pylen, col=pdcomnam))+
   geom_point()+
   geom_smooth(method='lm', col="black")+
