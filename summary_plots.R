@@ -297,20 +297,46 @@ ggsave(filename="C:/Users/kecoleman/Documents/SL/port_ammo_2010s.png", plot=p)
 
 # ------------------------ #
 
+# ------------------------ #
+#bar plot of pred vs. mean prey size with sd, order smallest to largest
+# ------------------------ #
+sum.allfhlen2 = allfhlen2 %>% group_by(pdcomnam) %>% 
+  summarise(mean.pylen = mean(pylen, na.rm = TRUE),
+            sd = sd(pylen, na.rm=TRUE))
+
+p = ggplot(sum.allfhlen2, aes(reorder(pdcomnam,-mean.pylen), mean.pylen, fill=pdcomnam))+
+  geom_col()+
+  geom_errorbar(aes(ymin=mean.pylen-sd, ymax=mean.pylen+sd), width=.5)+
+  ylab("Prey length (mm)")+
+  xlab("Species")+
+  ggtitle("Mean prey size per species") +
+  theme_bw()+ 
+  coord_flip()+
+  theme(#axis.text.x = element_text(angle = 65, hjust = 1),
+        legend.position = "none")
+p
+ggsave(filename="C:/Users/kecoleman/Documents/SL/mean_prey_size_by_species.png", plot=p)
+# ------------------------ #
 
 # ------------------------ #
-# sum tables
+# scatter all pred size and all prey size
+# with quant. reg at 1 and 99 
 # ------------------------ #
-select(sciname, comname, relmsw, relci)
+taus = c(0.1,0.99)
+p = ggplot(allfhlen2, aes(pdlen, pylen, col=pdcomnam))+
+  geom_point()+
+  geom_smooth(method='lm', col="black")+
+  ylab("Prey length (mm)")+
+  xlab("Predator length (cm)")+
+  ggtitle("Predator size vs. prey size per species") +
+  theme_bw() + 
+  facet_wrap(~as.factor(pdcomnam), nrow=5)+
+  geom_quantile(quantiles = taus, col="black")+
+  theme(legend.position = "none",
+        strip.text = element_text(size=7))
+p
+ggsave(filename="C:/Users/kecoleman/Documents/SL/quant_reg_and _lm_of_pred_size_and_prey_size_by_species.png", plot=p)
 
 # ------------------------ #
-
-
-# ------------------------ #
-# expot
-# ------------------------ #
-
-# ------------------------ #
-
 
 
