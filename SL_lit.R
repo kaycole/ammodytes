@@ -113,9 +113,10 @@ sl = mutate(sl, diet = NA,
             location.region = replace(location.region, location.region %in% c("Newfoundland","Grand Bank"), "GrB"), #check newfoundland - could be different
             location.region = replace(location.region, location.region %in% "Gulf of St. Lawrence", "GSL"),
             location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE"),"NWA"),
-            location.region2 = location.region,
-            location.region2 = replace(location.region2, location.region2 %in% c("GSL","GrB","ScS"),"Canada"))
-            #diet.metric = replace(diet.metric, diet.metric %in% "otoliths","O"))
+            #location.region2 = location.region,
+            #location.region2 = replace(location.region2, location.region2 %in% c("GSL","GrB","ScS"),"Canada"),
+            diet.metric = replace(diet.metric, diet.metric %in% c("O","otoliths","N"),"FO"),
+            diet.metric = replace(diet.metric, diet.metric %in% "C:N",NA)) 
 # indicate if the study measured %mass/volume, % frequency of occurrence, or %number, 
 # %Index of Relative Importance (IRI) 
 # M = mass
@@ -123,11 +124,6 @@ sl = mutate(sl, diet = NA,
 # W = weight
 # FO = frequency of occurrence
 # IRI = Index of relative importance
-# N = number?
-# C:N = carbon to nitrogren isotopes
-# otoliths = might also be chemistry like C:N
-# O = occurrence?
-
 
 
 mean.sl.by.paper = sl %>% group_by(sciname,id) %>% 
