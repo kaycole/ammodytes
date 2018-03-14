@@ -112,7 +112,7 @@ sl = mutate(sl, diet = NA,
             diet.metric = replace(diet.metric, diet.metric %in% "?","undefined"),
             # location.region = replace(location.region, location.region %in% c("Gulf of Maine","NWA/ GOM ","NWA/ GOM"), "GOM"),
             # location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "MAB"),
-            # location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "SNE"),
+            # location.region = replace(location.region, location.region %in% c("NWA/ SNE","Southern NE"), "SNE"),
             # location.region = replace(location.region, location.region %in% c("Nova Scotian Shelf","Scotian Shelf","Nova Scotia"), "ScS"),
             # location.region = replace(location.region, location.region %in% c("Newfoundland","newfoundland","Newfoundland and Labrador "), "NFL"),
             # location.region = replace(location.region, location.region %in% c("Grand Bank","Grand Banks"), "GrB"), 
@@ -121,7 +121,7 @@ sl = mutate(sl, diet = NA,
             # location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE"),"NWA"),
             location.region = replace(location.region, location.region %in% c("NWA/ GOM ","NWA/ GOM"), "Gulf of Maine"),
             location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "Mid-Atlantic Bight"),
-            location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "Southern New England"),
+            location.region = replace(location.region, location.region %in% c("NWA/ SNE","Southern NE"), "Southern New England"),
             location.region = replace(location.region, location.region %in% c("Nova Scotian Shelf","Nova Scotia"), "Scotian Shelf"),
             location.region = replace(location.region, location.region %in% c("newfoundland","Newfoundland","Newfoundland and Labrador "), "Newfoundland and Labrador"),
             location.region = replace(location.region, location.region %in% c("Grand Bank"), "Grand Banks"), 
@@ -165,12 +165,13 @@ mean.sl.by.paper = sl %>% group_by(sciname,id) %>%
          new.var = replace(new.var, location.region %in% "Mid-Atlantic Bight",1),
          new.var = replace(new.var, location.region %in% "Southern New England",2),
          new.var = replace(new.var, location.region %in% "Gulf of Maine",3),
-         new.var = replace(new.var, location.region %in% "Scotian Shelf",4),
-         new.var = replace(new.var, location.region %in% "Gulf of St. Lawrence",5),
-         new.var = replace(new.var, location.region %in% "Grand Banks",6),
-         new.var = replace(new.var, location.region %in% "Newfoundland and Labrador",7),
-         new.var = replace(new.var, location.region %in% "Western Greenland",8),
-         new.var = replace(new.var, location.region %in% "Northwest Atlantic",9)) %>% 
+         new.var = replace(new.var, location.region %in% "Georges Bank",4),
+         new.var = replace(new.var, location.region %in% "Scotian Shelf",5),
+         new.var = replace(new.var, location.region %in% "Gulf of St. Lawrence",6),
+         new.var = replace(new.var, location.region %in% "Grand Banks",7),
+         new.var = replace(new.var, location.region %in% "Newfoundland and Labrador",8),
+         new.var = replace(new.var, location.region %in% "Western Greenland",9),
+         new.var = replace(new.var, location.region %in% "Northwest Atlantic",10)) %>% 
   arrange(new.var)
 
 #mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
@@ -273,7 +274,7 @@ ggplot()+
   
 # ----------------- #
 # means with color = location, shape = metric
-
+cbPalette <- c("#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#000000","#999999")
 ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA)), 
        aes(y = mean.diet, x = reorder(sciname, mean.diet, na.rm=TRUE), 
            col = reorder(location.region,new.var), 
@@ -289,5 +290,6 @@ ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA
   ylab('mean proportion of ammodytes in diet')+
   xlab('species')+ 
   guides(col=guide_legend(title="Location"),
-         shape=guide_legend(title="Diet Metric (%)"))
+         shape=guide_legend(title="Diet Metric (%)"))+
+  scale_colour_manual(values=cbPalette)
   
