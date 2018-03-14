@@ -15,7 +15,7 @@ require(ggplot2)
 # ------------ #
 # load data
 # ------------ #
-sl <- read_excel("~/SL/Sandlance_predator_Litsearch_6.28.17.xlsx", col_names = TRUE, skip=1)
+sl <- read_excel("~/SL/Sandlance_predator_Litsearch_3.13.18.xlsx", col_names = TRUE, skip=1)
 names(sl) = c("comname","lesser","mid","greater","diet.metric","prey.size","location.region",
               "location.local","years","seasons","ref","notes")
 sl = as.data.frame(sl[1:(which(is.na(sl$comname))[1]-1),1:12]) # issues with NA column names and rows
@@ -81,8 +81,8 @@ rm(to.add)
 # format
 sl = mutate(sl, diet = NA, 
             sciname = comname,
-            sciname = replace(sciname, sciname %in% "American plaice","Pleuronectes platessa"),  
-            sciname = replace(sciname, sciname %in% "Atlantic cod","Gadus morhua"),         
+            sciname = replace(sciname, sciname %in% c("American plaice","american plaice"),"Pleuronectes platessa"),  
+            sciname = replace(sciname, sciname %in% c("Atlantic cod","atlantic cod","atlantic cod "),"Gadus morhua"),         
             sciname = replace(sciname, sciname %in% c("Atlantic sturgeon (adult)","Atlantic sturgeon (juvenile)"),"Acipenser oxyrhynchus oxyrhynchus"),
             sciname = replace(sciname, sciname %in% "Black sea bass","Centropristis striata"),               
             sciname = replace(sciname, sciname %in% c("Bluefin tuna","Bluefin tuna (<185cm)","Bluefin tuna (>185cm)","Bluefin tuna age 1-3","Bluefin tuna age 4-5"),"Thunnus thynnus"),
@@ -101,22 +101,44 @@ sl = mutate(sl, diet = NA,
             sciname = replace(sciname, sciname %in% "White hake","Urophycis tenuis"),  
             sciname = replace(sciname, sciname %in% "Winter Skate","Leucoraja ocellata"),
             sciname = replace(sciname, sciname %in% "Yellowfin tuna","Thunnus albacares"),
+            sciname = replace(sciname, sciname %in% c("Yellowtail flounder","yellowtail flounder"),"Pleuronectes ferruginea"),
+            sciname = replace(sciname, sciname %in% "haddock","Melanogrammus aeglefinus"),
+            sciname = replace(sciname, sciname %in% c("Atlantic salmon","atlantic salmon"),"Salmo salar"),
+            sciname = replace(sciname, sciname %in% "silver hake","Merluccius bilinearis"),
             lesser = as.numeric(lesser),
             mid= as.numeric(mid),
             greater=as.numeric(greater),
             diet = apply(cbind(lesser, mid, greater), 1, mean, na.rm=TRUE),
             diet.metric = replace(diet.metric, diet.metric %in% "?","undefined"),
-            location.region = replace(location.region, location.region %in% c("Gulf of Maine","NWA/ GOM ","NWA/ GOM"), "GOM"),
-            location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "MAB"),
-            location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "SNE"),
-            location.region = replace(location.region, location.region %in% c("Scotian Shelf"), "ScS"),
-            location.region = replace(location.region, location.region %in% c("Newfoundland","Grand Bank"), "GrB"), #check newfoundland - could be different
-            location.region = replace(location.region, location.region %in% "Gulf of St. Lawrence", "GSL"),
-            location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE"),"NWA"),
+            # location.region = replace(location.region, location.region %in% c("Gulf of Maine","NWA/ GOM ","NWA/ GOM"), "GOM"),
+            # location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "MAB"),
+            # location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "SNE"),
+            # location.region = replace(location.region, location.region %in% c("Nova Scotian Shelf","Scotian Shelf","Nova Scotia"), "ScS"),
+            # location.region = replace(location.region, location.region %in% c("Newfoundland","newfoundland","Newfoundland and Labrador "), "NFL"),
+            # location.region = replace(location.region, location.region %in% c("Grand Bank","Grand Banks"), "GrB"), 
+            # location.region = replace(location.region, location.region %in% "Gulf of St. Lawrence", "GSL"),
+            # location.region = replace(location.region, location.region %in% "western greenland", "WG"),
+            # location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE"),"NWA"),
+            location.region = replace(location.region, location.region %in% c("NWA/ GOM ","NWA/ GOM"), "Gulf of Maine"),
+            location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "Mid-Atlantic Bight"),
+            location.region = replace(location.region, location.region %in% c("NWA/ SNE"), "Southern New England"),
+            location.region = replace(location.region, location.region %in% c("Nova Scotian Shelf","Nova Scotia"), "Scotian Shelf"),
+            location.region = replace(location.region, location.region %in% c("newfoundland","Newfoundland","Newfoundland and Labrador "), "Newfoundland and Labrador"),
+            location.region = replace(location.region, location.region %in% c("Grand Bank"), "Grand Banks"), 
+            location.region = replace(location.region, location.region %in% "western greenland", "Western Greenland"),
+            location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE","NWA"),"Northwest Atlantic"),
+            diet.metric = replace(diet.metric, diet.metric %in% c("O","otoliths"),"FO"),
+            diet.metric = replace(diet.metric, diet.metric %in% "C:N",NA),
+            diet.metric.formal = diet.metric,
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "FO","Frequency of occurrence"),
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "IRI","Index of relative importance"),
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "M","Mass"),
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "N","Number"),
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "V","Volume"),
+            diet.metric.formal = replace(diet.metric.formal,diet.metric.formal %in% "W","Weight")) #,
             #location.region2 = location.region,
-            #location.region2 = replace(location.region2, location.region2 %in% c("GSL","GrB","ScS"),"Canada"),
-            diet.metric = replace(diet.metric, diet.metric %in% c("O","otoliths","N"),"FO"),
-            diet.metric = replace(diet.metric, diet.metric %in% "C:N",NA)) 
+            #location.region2 = replace(location.region2, location.region2 %in% c("GSL","GrB","ScS"),"Canada"))
+            #diet.metric = replace(diet.metric, diet.metric %in% "otoliths","O"))
 # indicate if the study measured %mass/volume, % frequency of occurrence, or %number, 
 # %Index of Relative Importance (IRI) 
 # M = mass
@@ -124,6 +146,11 @@ sl = mutate(sl, diet = NA,
 # W = weight
 # FO = frequency of occurrence
 # IRI = Index of relative importance
+# N = number?
+# C:N = carbon to nitrogren isotopes
+# otoliths = might also be chemistry like C:N
+# O = occurrence?
+
 
 
 mean.sl.by.paper = sl %>% group_by(sciname,id) %>% 
@@ -131,11 +158,22 @@ mean.sl.by.paper = sl %>% group_by(sciname,id) %>%
             sd = sd(diet, na.rm=TRUE),
             n = n(),
             diet.metric = first(diet.metric),
-            location.region = first(location.region),
-            location.region2 = first(location.region2)) %>%
-  mutate(error = qnorm(0.95)*sd/sqrt(n))
+            diet.metric.formal = first(diet.metric.formal),
+            location.region = first(location.region)) %>%
+  mutate(error = qnorm(0.95)*sd/sqrt(n),
+         new.var = NA,
+         new.var = replace(new.var, location.region %in% "Mid-Atlantic Bight",1),
+         new.var = replace(new.var, location.region %in% "Southern New England",2),
+         new.var = replace(new.var, location.region %in% "Gulf of Maine",3),
+         new.var = replace(new.var, location.region %in% "Scotian Shelf",4),
+         new.var = replace(new.var, location.region %in% "Gulf of St. Lawrence",5),
+         new.var = replace(new.var, location.region %in% "Grand Banks",6),
+         new.var = replace(new.var, location.region %in% "Newfoundland and Labrador",7),
+         new.var = replace(new.var, location.region %in% "Western Greenland",8),
+         new.var = replace(new.var, location.region %in% "Northwest Atlantic",9)) %>% 
+  arrange(new.var)
 
-mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
+#mean.sl = sl %>% group_by(sciname) %>% summarize(mean.diet = mean(diet, na.rm=TRUE))
 
 #summer - june, july, aug
 #spring - march, april, may
@@ -235,9 +273,12 @@ ggplot()+
   
 # ----------------- #
 # means with color = location, shape = metric
-ggplot(data = mean.sl.by.paper, aes(y = mean.diet, x = reorder(sciname, mean.diet), 
-                                    col=location.region, shape=diet.metric, 
-                                    size = mean.diet, stroke = 2))+
+
+ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA)), 
+       aes(y = mean.diet, x = reorder(sciname, mean.diet, na.rm=TRUE), 
+           col = reorder(location.region,new.var), 
+           shape = diet.metric.formal, 
+           stroke = 2))+
   geom_point()+
   scale_shape_manual(values=1:length(unique(mean.sl.by.paper$diet.metric))) +
   coord_flip()+
@@ -246,5 +287,7 @@ ggplot(data = mean.sl.by.paper, aes(y = mean.diet, x = reorder(sciname, mean.die
   theme_bw()+
   ggtitle('Proportion of ammodytes in diet from the literature review')+
   ylab('mean proportion of ammodytes in diet')+
-  xlab('species')
+  xlab('species')+ 
+  guides(col=guide_legend(title="Location"),
+         shape=guide_legend(title="Diet Metric (%)"))
   
