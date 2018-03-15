@@ -323,12 +323,15 @@ ggsave(filename="C:/Users/kecoleman/Documents/SL/mean_prey_size_by_species.png",
 # with quant. reg at 1 and 99 
 # ------------------------ #
 taus = c(0.01,0.99)
-p = ggplot(allfhlen2, aes(pdlen, pylen, col=pdcomnam))+
+allfhlen2.sub = allfhlen2 %>% filter(!pdcomnam %in% c("ALEWIFE","YELLOWTAIL FLOUNDER","BLACK SEA BASS",
+                                              "WINTER FLOUNDER","NORTHERN KINGFISH","NORTHERN SEAROBIN",
+                                              "SCUP","STRIPED SEAROBIN","ATLANTIC HALIBUT","OCEAN POUT"))
+p = ggplot(allfhlen2.sub, aes(pdlen, pylen, col=pdcomnam))+
   geom_point()+
   geom_smooth(method='lm', col="black")+
   ylab("Prey length (mm)")+
   xlab("Predator length (cm)")+
-  ggtitle("Predator size vs. prey size per species") +
+  ggtitle("Predator size vs. prey size per species (N>20)") +
   theme_bw() + 
   facet_wrap(~as.factor(pdcomnam), nrow=5)+
   geom_quantile(quantiles = taus, col="black")+
