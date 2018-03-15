@@ -15,7 +15,8 @@ require(ggplot2)
 # ------------ #
 # load data
 # ------------ #
-sl <- read_excel("~/SL/Sandlance_predator_Litsearch_3.13.18.xlsx", col_names = TRUE, skip=1)
+sl <- read_excel("~/SL/Sandlance_predator_Litsearch_3.15.18.xlsx", 
+                 sheet = "data table",col_names = TRUE, skip=1)
 names(sl) = c("comname","lesser","mid","greater","diet.metric","prey.size","location.region",
               "location.local","years","seasons","ref","notes")
 sl = as.data.frame(sl[1:(which(is.na(sl$comname))[1]-1),1:12]) # issues with NA column names and rows
@@ -105,6 +106,10 @@ sl = mutate(sl, diet = NA,
             sciname = replace(sciname, sciname %in% "haddock","Melanogrammus aeglefinus"),
             sciname = replace(sciname, sciname %in% c("Atlantic salmon","atlantic salmon"),"Salmo salar"),
             sciname = replace(sciname, sciname %in% "silver hake","Merluccius bilinearis"),
+            sciname = replace(sciname, sciname %in% "Arctic charr","Salvelinus alpinus"),
+            sciname = replace(sciname, sciname %in% c("atlantic sea herring","herring"),"Clupea harengus"),
+            sciname = replace(sciname, sciname %in% "atlantic mackerel ","Scomber scombrus"),
+            sciname = replace(sciname, sciname %in% "Greenland halibut","Reinhardtius hippoglossoides"),
             lesser = as.numeric(lesser),
             mid= as.numeric(mid),
             greater=as.numeric(greater),
@@ -123,7 +128,8 @@ sl = mutate(sl, diet = NA,
             location.region = replace(location.region, location.region %in% c("NJ Coast","NWA/MAB"), "Mid-Atlantic Bight"),
             location.region = replace(location.region, location.region %in% c("NWA/ SNE","Southern NE"), "Southern New England"),
             location.region = replace(location.region, location.region %in% c("Nova Scotian Shelf","Nova Scotia"), "Scotian Shelf"),
-            location.region = replace(location.region, location.region %in% c("newfoundland","Newfoundland","Newfoundland and Labrador "), "Newfoundland and Labrador"),
+            location.region = replace(location.region, location.region %in% c("newfoundland","Newfoundland",
+                                                                              "Newfoundland and Labrador ","Labrador "), "Newfoundland and Labrador"),
             location.region = replace(location.region, location.region %in% c("Grand Bank"), "Grand Banks"), 
             location.region = replace(location.region, location.region %in% "western greenland", "Western Greenland"),
             location.region = replace(location.region, location.region %in% c("NWA/ GOM and GB","NWA/ GOM and SNE","NWA"),"Northwest Atlantic"),
@@ -274,8 +280,11 @@ ggplot()+
   
 # ----------------- #
 # means with color = location, shape = metric
-cbPalette <- c("#CC79A7", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#000000","#999999")
-ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA)), 
+cbPalette <- c("#CC79A7", "#D55E00", "#E69F00", 
+               "#F0E442", "#009E73", "#56B4E9",   
+               "#0072B2", "darkmagenta", 
+               "#000000","#999999")
+p = ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA)), 
        aes(y = mean.diet, x = reorder(sciname, mean.diet, na.rm=TRUE), 
            col = reorder(location.region,new.var), 
            shape = diet.metric.formal, 
@@ -292,4 +301,5 @@ ggplot(data = filter(mean.sl.by.paper, !diet.metric.formal %in% c("undefined",NA
   guides(col=guide_legend(title="Location"),
          shape=guide_legend(title="Diet Metric (%)"))+
   scale_colour_manual(values=cbPalette)
-  
+p
+ggsave(file = "~/SL/prop_ammo_in_lit.png",plot=p)  
