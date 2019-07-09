@@ -129,7 +129,64 @@ mm$type = "Marine Mammals"
 all_data = bind_rows(birds, fish, mm)
 
 # change location to only first few letters to be the same (if there is a comma)
-all_data = mutate(all_data, loc = replace(loc, grep(loc, ","), sapply(strsplit(loc, ","), head, 1)))
+#all_data = mutate(all_data, loc = replace(loc, grep(loc, ","), sapply(strsplit(loc, ","), head, 1)))
+all_data = mutate(all_data, 
+                  loc = replace(loc, loc %in% c("\nSmall Island, Newfoundland, Canada",
+                                                "Baccalieu Island, Newfoundland, Canada",
+                                                "Funk Island, Newfoundland, Canada",
+                                                "Small Island, Newfoundland, Canada",
+                                                "Great Island, Newfoundland, Canada",
+                                                "Newfoundland, Canada",
+                                                "Gull Island, Labrador, Canada",
+                                                "Gannet Islands, Labrador, Canada",
+                                                "Labrador, Newfoundland",
+                                                "Newfoundland and Labrador, Canada",
+                                                "Newfoundland, Labrador, Canada",
+                                                "Newfoundland and Labrador"), 
+                                "Newfoundland and Labrador"),
+                  loc = replace(loc, loc %in% c("Bay of Fundy, Canada",
+                                                "Bonaventure Island, Bay of Fundy, Canada"), 
+                                "Bay of Fundy"),
+                  loc = replace(loc, loc %in% c("Country Island, Nova Scotia, Canada",
+                                                "Nova Scotia, Canada"), 
+                                "Nova Scotia" ),
+                  loc = replace(loc, loc %in% c("Brandypot and St Mary's Islands, Gulf of St. Lawrence, Quebec, Canada",
+                                                "Gulf of St. Lawrence, Canada",
+                                                "Gulf St. Lawrence, Canada",
+  
+                                                "Gulf of St. Lawrence, Quebec, Canada"), 
+                                "Gulf of St. Lawrence"),
+                  loc = replace(loc, loc %in% "Hudson Bay, Canada", 
+                                "Hudson Bay"),
+                  loc = replace(loc, loc %in% c("Stratton, Jenny, Eastern Egg Rock, Seal Islands, Gulf of Maine, USA",
+                                                "Seal Island, Matinicus\nRock, Eastern Egg Rock Islands, Gulf of Maine, USA",
+                                                "Maine, USA",
+                                                "GoM, Saco River Estuary",
+                                                "GoM",
+                                                "GoM, Stellwagen Bank"), 
+                                "Gulf of Maine"),
+                  loc = replace(loc, loc %in% c("SNE","Massachusetts, USA",
+                                                "Penikese, Bird, and Ram Islands, Massachusetts, USA",
+                                                "New England",
+                                                "Connecticut, USA"), 
+                                "Southern New England"),
+                  loc = replace(loc, loc %in% c("New York, USA","MAB"),
+                                "Mid-Atlantic Bight"),
+                  loc = replace(loc, loc %in% c("ScS","ScS, Bay of Fundy, Canada"),
+                                "Scotian Shelf"),
+                  loc = replace(loc, loc %in% c("Grand Banks, Canada","GB"), 
+                                "Grand Banks"),
+                  loc = replace(loc, loc %in% c("GB"), 
+                                "Georges Banks"),
+                  loc = replace(loc, loc %in% c("Eastern Canada",
+                                                "Grand Banks, Labrador, Newfoundland",
+                                                "Akpatok Island, Baffin, Canada",
+                                                "Quebec, Canada",
+                                                "New Brunswick, Canada"), 
+                                "Canadian Atlantic"),
+                  loc = replace(loc, loc %in% c("GoM, GB","SNE, MAB"), 
+                                "American Atlantic"),
+                  loc = replace(loc, loc %in% "Nunavut, Canada","Canadian Arctic"))
 #--------------#
 
 
@@ -137,9 +194,13 @@ all_data = mutate(all_data, loc = replace(loc, grep(loc, ","), sapply(strsplit(l
 # plot
 #--------------#
 ggplot()+
-  geom_point(data = all_data, aes(x = species, y = diet, shape = metric, col = loc))+
+  geom_point(data = all_data, aes(x = reorder(species,diet,na.rm=TRUE), y = diet, shape = metric, col = loc), 
+             size=5, lwd=5)+
   coord_flip()+
-  facet_wrap(~type, ncol=1)+
-  theme_bw()+
-  theme(legend.position = "none")
+  labs(x="Species", y="Percent of sand lance in diet")+
+  #theme(text = element_text(size=20))+
+  scale_shape_manual(values=1:10) +
+  #facet_wrap(~type, ncol=1)+
+  theme_bw()#+
+  #theme(legend.position = "none")
 #--------------#
