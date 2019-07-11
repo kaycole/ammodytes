@@ -9,6 +9,7 @@
 require(dplyr)
 require(ggplot2)
 library(readxl)
+require(tidyverse) #may need to use devtools::install_github("hadley/tidyverse") depending on version if not installed yet
 #--------------#
 
 
@@ -16,7 +17,8 @@ library(readxl)
 # load data
 #--------------#
 # data is downloaded from google drive full_manuscript/all_tables
-dir.in = "C:/Users/kcoleman/Downloads"
+#dir.in = "C:/Users/kcoleman/Downloads"
+dir.in = "~/Downloads/"
 birds <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 8, skip = 1)
 fish <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 7, skip = 1)
 mm <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 9, skip = 1)
@@ -153,7 +155,7 @@ all_data = mutate(all_data,
                   loc = replace(loc, loc %in% c("Brandypot and St Mary's Islands, Gulf of St. Lawrence, Quebec, Canada",
                                                 "Gulf of St. Lawrence, Canada",
                                                 "Gulf St. Lawrence, Canada",
-  
+                                                
                                                 "Gulf of St. Lawrence, Quebec, Canada"), 
                                 "Gulf of St. Lawrence"),
                   loc = replace(loc, loc %in% "Hudson Bay, Canada", 
@@ -187,20 +189,44 @@ all_data = mutate(all_data,
                   loc = replace(loc, loc %in% c("GoM, GB","SNE, MAB"), 
                                 "American Atlantic"),
                   loc = replace(loc, loc %in% "Nunavut, Canada","Canadian Arctic"))
+
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+        sep="", collapse=" ")
+}
+
+all_data = mutate(all_data, species = sapply(species, simpleCap),
+                  species = replace(species, species %in% "Roseate Tern (kleptoparasitic)", "Roseate Tern"),
+                  metric = replace(metric, is.na(metric), "Not described"))
 #--------------#
 
 
 #--------------#
 # plot
 #--------------#
-ggplot()+
+# p = ggplot()+
+#   geom_point(data = all_data, aes(x = reorder(species,diet,na.rm=TRUE), y = diet, shape = metric, col = loc), 
+#              size=5, lwd=5)+
+#   coord_flip()+
+#   labs(x="Species", y="Percent of sand lance in diet")+
+#   theme(text = element_text(size=20))+
+#   scale_shape_manual(values=1:10) +
+#   theme_bw()#+
+# #theme(legend.position = "none")
+# p 
+# ggsave(paste(dir.in, "Fig8_option1_all_together.png", sep="/"), p)
+
+p = ggplot()+
   geom_point(data = all_data, aes(x = reorder(species,diet,na.rm=TRUE), y = diet, shape = metric, col = loc), 
-             size=5, lwd=5)+
+             size=4)+
   coord_flip()+
-  labs(x="Species", y="Percent of sand lance in diet")+
-  #theme(text = element_text(size=20))+
-  scale_shape_manual(values=1:10) +
-  #facet_wrap(~type, ncol=1)+
+  labs(x="Species", y="Percent of sand lance in diet",
+       col = "Location of Study", shape = "Diet Metric")+
+  theme(text = element_text(size=20))+
+  scale_shape_manual(values=1:11) +
+  facet_grid(type~., scales = "free", space = "free")+
   theme_bw()#+
-  #theme(legend.position = "none")
+p 
+ggsave(paste(dir.in, "Fig8_facet_grid.png", sep="/"), p)
 #--------------#
