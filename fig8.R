@@ -176,7 +176,7 @@ all_data = mutate(all_data,
                                 "Mid-Atlantic Bight"),
                   loc = replace(loc, loc %in% c("ScS","ScS, Bay of Fundy, Canada"),
                                 "Scotian Shelf"),
-                  loc = replace(loc, loc %in% c("Grand Banks, Canada","GB"), 
+                  loc = replace(loc, loc %in% c("Grand Banks, Canada"), 
                                 "Grand Banks"),
                   loc = replace(loc, loc %in% c("GB"), 
                                 "Georges Banks"),
@@ -186,9 +186,11 @@ all_data = mutate(all_data,
                                                 "Quebec, Canada",
                                                 "New Brunswick, Canada"), 
                                 "Canadian Atlantic"),
-                  loc = replace(loc, loc %in% c("GoM, GB","SNE, MAB"), 
+                  loc = replace(loc, loc %in% c("GoM, GB",
+                                                "SNE, MAB"), 
                                 "American Atlantic"),
-                  loc = replace(loc, loc %in% "Nunavut, Canada","Canadian Arctic"))
+                  loc = replace(loc, loc %in% "Nunavut, Canada",
+                                "Canadian Arctic"))
 
 simpleCap <- function(x) {
   s <- strsplit(x, " ")[[1]]
