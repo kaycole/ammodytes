@@ -17,8 +17,8 @@ require(tidyverse) #may need to use devtools::install_github("hadley/tidyverse")
 # load data
 #--------------#
 # data is downloaded from google drive full_manuscript/all_tables
-#dir.in = "C:/Users/kcoleman/Downloads"
-dir.in = "~/Downloads/"
+dir.in = "C:/Users/kcoleman/Downloads"
+#dir.in = "~/Downloads/"
 birds <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 8, skip = 1)
 fish <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 7, skip = 1)
 mm <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 9, skip = 1)
@@ -150,8 +150,10 @@ all_data = mutate(all_data,
                                                 "Bonaventure Island, Bay of Fundy, Canada"), 
                                 "Bay of Fundy"),
                   loc = replace(loc, loc %in% c("Country Island, Nova Scotia, Canada",
-                                                "Nova Scotia, Canada"), 
-                                "Nova Scotia" ),
+                                                "Nova Scotia, Canada",
+                                                "ScS","ScS, Bay of Fundy, Canada",
+                                                "Nova Scotia"), 
+                                "Nova Scotia and Scotian Shelf" ),
                   loc = replace(loc, loc %in% c("Brandypot and St Mary's Islands, Gulf of St. Lawrence, Quebec, Canada",
                                                 "Gulf of St. Lawrence, Canada",
                                                 "Gulf St. Lawrence, Canada",
@@ -174,8 +176,6 @@ all_data = mutate(all_data,
                                 "Southern New England"),
                   loc = replace(loc, loc %in% c("New York, USA","MAB"),
                                 "Mid-Atlantic Bight"),
-                  loc = replace(loc, loc %in% c("ScS","ScS, Bay of Fundy, Canada"),
-                                "Scotian Shelf"),
                   loc = replace(loc, loc %in% c("Grand Banks, Canada"), 
                                 "Grand Banks"),
                   loc = replace(loc, loc %in% c("GB"), 
@@ -184,11 +184,10 @@ all_data = mutate(all_data,
                                                 "Grand Banks, Labrador, Newfoundland",
                                                 "Akpatok Island, Baffin, Canada",
                                                 "Quebec, Canada",
-                                                "New Brunswick, Canada"), 
-                                "Canadian Atlantic"),
-                  loc = replace(loc, loc %in% c("GoM, GB",
+                                                "New Brunswick, Canada",
+                                                "GoM, GB",
                                                 "SNE, MAB"), 
-                                "American Atlantic"),
+                                "North Atlantic"),
                   loc = replace(loc, loc %in% "Nunavut, Canada",
                                 "Canadian Arctic"))
 
@@ -200,7 +199,17 @@ simpleCap <- function(x) {
 
 all_data = mutate(all_data, species = sapply(species, simpleCap),
                   species = replace(species, species %in% "Roseate Tern (kleptoparasitic)", "Roseate Tern"),
-                  metric = replace(metric, is.na(metric), "Not described"))
+                  metric = replace(metric, is.na(metric), "Not described"),
+                  loc = replace(loc, is.na(loc), "North Atlantic"),
+                  metric = replace(metric, metric %in% "otoliths", "FO"))
+
+# add order to spacial
+all_data$loc = factor(all_data$loc, levels = c("Canadian Arctic","Hudson Bay","Greenland",
+                                               "Newfoundland and Labrador","Gulf of St. Lawrence",
+                                               "Grand Banks","Nova Scotia and Scotian Shelf",
+                                               "Bay of Fundy","Gulf of Maine","Georges Banks",
+                                               "Southern New England","Mid-Atlantic Bight",
+                                               "North Atlantic"))
 #--------------#
 
 
