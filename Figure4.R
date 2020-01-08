@@ -17,11 +17,10 @@ require(tidyverse) #may need to use devtools::install_github("hadley/tidyverse")
 # load data
 #--------------#
 # data is downloaded from google drive full_manuscript/all_tables
-dir.in = "C:/Users/kcoleman/Downloads"
-#dir.in = "~/Downloads/"
-birds <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 8, skip = 1)
-fish <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 7, skip = 1)
-mm <- read_excel(paste(dir.in, "All_Tables.xlsx",sep="/"), sheet = 9, skip = 1)
+dir.in = "~/Downloads"
+birds <- read_excel(paste(dir.in, "FinalSupplementals_12.2.19.xlsx",sep="/"), sheet = 5, skip = 1)
+fish <- read_excel(paste(dir.in, "FinalSupplementals_12.2.19.xlsx",sep="/"), sheet = 4, skip = 1)
+mm <- read_excel(paste(dir.in, "FinalSupplementals_12.2.19.xlsx",sep="/"), sheet = 7, skip = 1)
 #--------------#
 
 
@@ -39,11 +38,13 @@ rm(adult_birds, chick_birds, combo_birds)
 birds = birds[,c(1,3,4,5)]
 names(birds) = c("species","loc","diet","metric")
 
-fish = fish[,c(1,7,4,5)]
+#fish = fish[,c(1,7,4,5)]
+fish = fish[,c(1,3,5,6)]
 names(fish) = c("species","loc","diet","metric")
 fish = filter(fish, !diet %in% "P")
 
-mm = mm[,c(2,8,5,6)]
+#mm = mm[,c(2,8,5,6)]
+mm = mm[,c(2,6,4,5)]
 names(mm) = c("species","loc","diet","metric")
 mm = filter(mm, !diet %in% "Present")
 
@@ -187,7 +188,7 @@ all_data = mutate(all_data,
                                                 "New Brunswick, Canada",
                                                 "GoM, GB",
                                                 "SNE, MAB"), 
-                                "North Atlantic"),
+                                "North West Atlantic"),
                   loc = replace(loc, loc %in% "Nunavut, Canada",
                                 "Canadian Arctic"))
 
@@ -200,8 +201,10 @@ simpleCap <- function(x) {
 all_data = mutate(all_data, species = sapply(species, simpleCap),
                   species = replace(species, species %in% "Roseate Tern (kleptoparasitic)", "Roseate Tern"),
                   metric = replace(metric, is.na(metric), "Not described"),
-                  loc = replace(loc, is.na(loc), "North Atlantic"),
+                  loc = ifelse(is.na(loc), "North West Atlantic", loc),
                   metric = replace(metric, metric %in% "otoliths", "FO"))
+all_data = mutate(all_data, 
+                  loc = replace(loc, is.na(loc), "North West Atlantic"))
 
 # add order to spacial
 all_data$loc = factor(all_data$loc, levels = c("Canadian Arctic","Hudson Bay","Greenland",
@@ -209,7 +212,14 @@ all_data$loc = factor(all_data$loc, levels = c("Canadian Arctic","Hudson Bay","G
                                                "Grand Banks","Nova Scotia and Scotian Shelf",
                                                "Bay of Fundy","Gulf of Maine","Georges Banks",
                                                "Southern New England","Mid-Atlantic Bight",
-                                               "North Atlantic"))
+                                               "North West Atlantic"))
+# expand metric abbrv
+all_data = mutate(all_data, 
+                  metric = replace(metric, metric %in% "M", "Mass (g)"),
+                  metric = replace(metric, metric %in% "N", "Number of Individuals"),
+                  metric = replace(metric, metric %in% "V", "Volume"),
+                  metric = replace(metric, metric %in% "FO", "Frequence of Occurrence"),
+                  metric = replace(metric, metric %in% "IRI", "Index of Relative Importance"))
 #--------------#
 
 
@@ -228,9 +238,11 @@ all_data$loc = factor(all_data$loc, levels = c("Canadian Arctic","Hudson Bay","G
 # p 
 # ggsave(paste(dir.in, "Fig8_option1_all_together.png", sep="/"), p)
 
-p = ggplot()+
+tiff("Figure4.tiff", units="in", width=10, height=10, res=300)
+
+ggplot()+
   geom_point(data = all_data, aes(x = reorder(species,diet,na.rm=TRUE), y = diet, shape = metric, col = loc), 
-             size=4)+
+             size=4, stroke=1)+
   coord_flip()+
   labs(x="Species", y="Percent of sand lance in diet",
        col = "Location of Study", shape = "Diet Metric")+
@@ -238,6 +250,7 @@ p = ggplot()+
   scale_shape_manual(values=1:11) +
   facet_grid(type~., scales = "free", space = "free")+
   theme_bw()#+
-p 
-ggsave(paste(dir.in, "Fig8_facet_grid.png", sep="/"), p)
+
+dev.off()
+# tiff saves in directory so easiest if set as a project mapped to local path
 #--------------#
